@@ -94,7 +94,7 @@ class TicketController extends Controller
                         ->where('state', $state)
                         ->orderBy('created_at', 'desc')
                         ->paginate($perPage);
-                        
+
         return response()->json($tickets);
     }
 }
