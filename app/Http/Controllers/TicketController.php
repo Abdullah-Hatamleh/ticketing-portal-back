@@ -78,4 +78,23 @@ class TicketController extends Controller
         'ticket' => $ticket,
     ]);
     }
+
+    public function getByState(string $state, Request $request) {
+
+        $possible_states = ['open', 'closed', 'awaiting'];
+        if(!in_array($state, $possible_states)) {
+            return response()->json([
+                'message' => 'specfied state does not exist'
+            ],Response::HTTP_BAD_REQUEST);
+        }
+        $userId = Auth::user()->id;
+
+        $perPage = $request->query('per_page', 5);
+        $tickets = Ticket::where('user_id', $userId)
+                        ->where('state', $state)
+                        ->orderBy('created_at', 'desc')
+                        ->paginate($perPage);
+                        
+        return response()->json($tickets);
+    }
 }

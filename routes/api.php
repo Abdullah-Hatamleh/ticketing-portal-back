@@ -18,6 +18,7 @@ Route::post('login', 'AuthenticationController@login')->name('login');
 
 Route::middleware('auth:sanctum')->group(function () {
 Route::get('tickets/{ticket}',[TicketController::class, 'show']);
+Route::get('tickets/bystate/{state}', [TicketController::class, 'getByState']);
 Route::post('tickets/reopen/{ticket}', [TicketController::class, 'reopen']);
 
 Route::get('tickets',[TicketController::class, 'index']);
