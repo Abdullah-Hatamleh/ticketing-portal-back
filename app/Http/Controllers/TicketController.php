@@ -6,6 +6,7 @@ use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TicketController extends Controller
 {
@@ -38,13 +39,26 @@ class TicketController extends Controller
         $validatedRequest = $request->validate([
             'issue' => 'required|max:255',
             'priority' => 'required',
+            'attachment' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+            'categories' => 'array| nullable'
         ]);
+
+        // Log::info($validatedRequest['categories']);
+        //Handling file upload
+        $path = null;
+        if($request->hasFile('attachment')){
+            $path = $request->file('attachment')->store('attachments', 'public');
+            $path = "http://" . Config('app.url') . "/storage" . "/" . $path;
+        }
+
         $ticket = Ticket::create([
             'issue' => $validatedRequest['issue'],
             'priority' => $validatedRequest['priority'],
             'user_id' => Auth::user()->id,
-            'state' => 'open'
-        ]);
+            'state' => 'open',
+            'attachment' => $path,
+            'categories' => $validatedRequest['categories'] ?? null
+            ]);
 
         return $ticket;
 
@@ -70,7 +84,7 @@ class TicketController extends Controller
                     'message' => 'Cannot reopen an open ticket'
                 ],Response::HTTP_BAD_REQUEST);
         }
-        $ticket->state = 'awaiting';
+        $ticket->state = 'open';
         $ticket->save();
 
         return response()->json([

@@ -14,6 +14,10 @@ class Ticket extends Model
     protected $guarded = [];
     //o
 
+    protected $casts = [
+        'categories' => 'array'
+    ];
+
     public function user(): BelongsTo {
         return $this->belongsTo(User::class);
     }
