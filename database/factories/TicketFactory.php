@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class TicketFactory extends Factory
 {
+
     /**
      * Define the model's default state.
      *
@@ -16,11 +17,13 @@ class TicketFactory extends Factory
      */
     public function definition(): array
     {
+        $states = ['closed', 'open', 'awaiting'];
+        $priorities = ['low','medium','high','critical'];
         return [
-            //
             'issue' => fake()->name(),
-            'priority' => 'low',
+            'priority' => $priorities[rand(0,3)],
             'user_id' => 1,
+            'state' => $states[rand(0,2)]
         ];
     }
 }
