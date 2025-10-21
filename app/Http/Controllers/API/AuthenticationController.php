@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\PersonalAccessToken;
+
 class AuthenticationController extends Controller
 {
     //
@@ -46,5 +48,12 @@ class AuthenticationController extends Controller
         $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json(['token' => $token]);
+    }
+
+    public function logoutAll() {
+
+        PersonalAccessToken::truncate();
+
+        return response()->json(['message' => 'All users logged out'],200);
     }
 }

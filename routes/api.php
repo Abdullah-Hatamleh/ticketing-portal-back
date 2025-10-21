@@ -13,7 +13,7 @@ Route::get('/user', function (Request $request) {
 
 Route::group(['namespace' => 'App\Http\Controllers\API'], function () {
 
-
+Route::post('admin/logout-all', 'AuthenticationController@logoutAll');
 Route::post('login', 'AuthenticationController@login')->name('login');
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -25,5 +25,7 @@ Route::get('tickets',[TicketController::class, 'index']);
 Route::post('tickets',[TicketController::class, 'store']);
 });
 });
+
+
 
 
