@@ -23,6 +23,6 @@ class Ticket extends Model
     }
 
     public function replies(): HasMany {
-        return $this->hasMany(Reply::class)->orderBy('created_at','desc');
+        return $this->hasMany(Reply::class)->orderBy('created_at','asc');
     }
 }

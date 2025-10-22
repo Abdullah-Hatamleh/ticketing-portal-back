@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Reply;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -37,8 +38,9 @@ class TicketController extends Controller
     public function store(Request $request)
     {
         $validatedRequest = $request->validate([
-            'issue' => 'required|max:255',
+            'issue' => 'required|max:255|string',
             'priority' => 'required',
+            'comment' => 'nullable|string',
             'attachment' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
             'categories' => 'array| nullable'
         ]);
@@ -54,6 +56,7 @@ class TicketController extends Controller
         $ticket = Ticket::create([
             'issue' => $validatedRequest['issue'],
             'priority' => $validatedRequest['priority'],
+            'comment' => $validatedRequest['comment'],
             'user_id' => Auth::user()->id,
             'state' => 'open',
             'attachment' => $path,
@@ -74,7 +77,7 @@ class TicketController extends Controller
         return response()->json($ticket);
     }
 
-    public function reopen(Ticket $ticket) {
+    public function reopen(Ticket $ticket, Request $request) {
         if($ticket->user_id !== Auth::user()->id) {
             abort(Response::HTTP_FORBIDDEN, 'you do not have access to this ticket');
         }
@@ -84,8 +87,18 @@ class TicketController extends Controller
                     'message' => 'Cannot reopen an open ticket'
                 ],Response::HTTP_BAD_REQUEST);
         }
+        $validatedRequest = $request->validate([
+            'comment' => 'required|string'
+        ]);
+        Reply::create([
+            'ticket_id' => $ticket->id,
+            'comment' => $validatedRequest['comment'],
+            'user_id' => Auth::user()->id
+        ]);
+
         $ticket->state = 'open';
         $ticket->save();
+        $ticket->load('replies');
 
         return response()->json([
         'message' => 'Ticket reopened successfully.',
@@ -104,9 +117,10 @@ class TicketController extends Controller
         $userId = Auth::user()->id;
 
         $perPage = $request->query('per_page', 5);
-        $tickets = Ticket::where('user_id', $userId)
+        $tickets = Ticket::with('replies')
+                        ->where('user_id', $userId)
                         ->where('state', $state)
-                        ->orderBy('created_at', 'desc')
+                        ->orderBy('updated_at', 'desc')
                         ->paginate($perPage);
 
         return response()->json($tickets);
